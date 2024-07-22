@@ -67,8 +67,11 @@ dados['dia'] = dados['Data'].dt.day
 dados = dados.set_index('Data')
 ```
 ## Análise da Série Temporal
+ - **Visualização da serie**
+![](imagens/serie_temporal1.png)
+
  - **Decomposição Sazonal:** Uso de um ciclo sazonal de 30 dias (+- 1 mês) para decompor a série em três componentes: tendência, sazonalidade e resíduo.
-   *serie_temporal1
+
    
  - **Teste de Dickey-Fuller (ADF):** Avaliação da estacionariedade da série temporal.
     - Estatística ADF e Valores Críticos: Verificação da estacionariedade com base na estatística ADF e valores críticos.
@@ -196,7 +199,61 @@ Valores Críticos:
    5%: -2.862440255934873
    10%: -2.5672492261933377
 ```
+
+
 Vamos visualizar novamente a serie após a diferenciação
-serie_temporaldiff
+
+![](/imagens/serie_temporaldiff.png)
+
+A partir da diferenciação vamos plotar a analise de decomposição da serie.
+
+![](imagens/decomp_diff.png)
 
 
+## Modelagem da Série Temporal
+
+ - **Modelo ARIMA**
+	- Seleção do Modelo: Identificação dos parâmetros (p, d, q) e sazonalidade (P, D, Q, S).
+	- Parâmetros do Modelo:
+		 - AR(1) (ar.L1): Coeficiente de 0.9881 (significativo).
+		 - MA(1) (ma.L1): Coeficiente de -0.0096 (não significativo).
+		 - AR Sazonal(30) (ar.S.L30): Coeficiente de -0.5351 (significativo).
+	- Critérios de Informação: AIC, BIC e HQIC.
+	- Testes Diagnósticos: Ljung-Box, Jarque-Bera e Heteroskedasticity.
+	- Diagnóstico do Modelo: Análise dos resíduos para verificar padrões e adequação do modelo,
+
+## Avaliação do Modelo ARIMA
+
+ - **Métricas de Avaliação:**
+	- MSE (Mean Squared Error): 799,849.81
+	- MAE (Mean Absolute Error): 708.31
+	- MAPE (Mean Absolute Percentage Error): 7.49%
+		- O MAPE relativamente baixo indica um bom desempenho geral do ARIMA. Embora o MSE e o MAE sejam altos, o MAPE fornece uma visão mais relativa e confiável da eficácia do modelo.
+
+- **Modelo XGBoost**
+	- Parâmetros do Modelo: {'learning_rate': 0.2, 'max_depth': 7, 'n_estimators': 150}.
+	- Treinamento e Previsão: Ajuste do modelo aos dados de treino e avaliação nas previsões.
+	- Análise de Overfitting: Comparação de métricas de treinamento e teste para identificar sinais de overfitting.
+
+## Resultados e Discussão
+ - **Modelo ARIMA:** Embora tenha mostrado um MAPE razoável (7.49%), o ARIMA apresentou valores altos de MAE (708.31) e MSE (799,849.81). A análise dos resíduos sugere que o modelo está ajustado de forma adequada, sem sinais claros de overfitting. O MAPE é um bom indicador da precisão relativa do modelo.
+   
+ - **Modelo XGBoost:** Mostrou um excelente desempenho com MAE (3.95) e MSE (53.53) baixos, mas evidências de overfitting foram observadas, especialmente pela discrepância entre o desempenho em treinamento e teste. O MAPE extremamente baixo (0.04%) sugere que o modelo pode ter se ajustado demais aos dados de treinamento.
+
+### Análise dos Resíduos:
+ - **ARIMA:** Os resíduos mostraram uma distribuição razoavelmente normal, mas o histograma não era perfeitamente normal, indicando possíveis discrepâncias.
+
+ - **XGBoost:** Os resíduos estavam próximos de zero, indicando uma boa correspondência entre previsões e valores reais, mas a precisão elevada pode mascarar problemas de overfitting.
+
+### Impacto das Métricas:
+ - **ARIMA:** Embora os valores altos de MSE e MAE sejam indicativos de erros grandes, o MAPE fornece uma visão relativa mais confiável, considerando a escala dos dados.
+
+ - **XGBoost:** A baixa performance em dados de teste indica que o modelo pode estar se ajustando demais, o que é preocupante para as previsões futuras.
+
+## Conclusão
+
+ - **Resumo dos Resultados:** O ARIMA, apesar de ter apresentado métricas de erro mais altas, mostrou-se mais robusto e menos sujeito a overfitting em comparação ao XGBoost. O MAPE mais baixo do ARIMA é indicativo de uma previsibilidade mais consistente.
+
+ - **Justificativa das Técnicas Utilizadas:** A escolha do ARIMA foi fundamentada na sua capacidade de generalização e estabilidade em previsões, mesmo com erros absolutos mais elevados. O XGBoost, apesar de seu bom desempenho absoluto, foi menos confiável devido ao overfitting.
+
+ - **Recomendações para Trabalhos Futuros:** Melhorar o modelo XGBoost para evitar overfitting e explorar técnicas adicionais para validação cruzada e ajuste de parâmetros. Considerar a inclusão de variáveis exógenas ou modelos híbridos para aprimorar a precisão das previsões.
