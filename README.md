@@ -213,7 +213,9 @@ A partir da diferenciação vamos plotar a analise de decomposição da serie.
 ## Modelagem da Série Temporal
 
  - **Modelo ARIMA**
-	- Seleção do Modelo: Identificação dos parâmetros (p, d, q) e sazonalidade (P, D, Q, S).
+	- Seleção do Modelo: Identificação dos parâmetros (p, d, q) e sazonalidade (P, D, Q, S). Para isso utilizamos como referência o ACF e PACF e também o gráfico de decomposição sazonal do status modelo que ajudou a identificar de S de 30 que se mostrou o 	  mais eficiente nas execuções do modelo.
+![**ACF PACF**](imagens/ACF-PACF.png)
+
 	- Parâmetros do Modelo:
 		 - AR(1) (ar.L1): Coeficiente de 0.9881 (significativo).
 		 - MA(1) (ma.L1): Coeficiente de -0.0096 (não significativo).
