@@ -6,7 +6,7 @@
 
 @marialuisamartins/[Maria Luisa Martins Brasil](https://www.linkedin.com/in/marialuisamartinsb/) :computer:	
 
-@--/[Maria Luiza Martins](https://www.linkedin.com/in/maria-luiza-martins-4115b213b/) :computer:	
+@marialmrt97/[Maria Luiza Martins](https://www.linkedin.com/in/maria-luiza-martins-4115b213b/) :computer:	
 
 @Pahmxx/[Phaola Oliveira Silva](https://www.linkedin.com/in/phaola-oliveira/) :computer:	
 
@@ -18,23 +18,9 @@ A previsão do fechamento do IBOVESPA é uma tarefa complexa e que possui relev�
 
 Este trabalho visa realizar uma análise comparativa entre diferentes modelos de predição, destacando suas vantagens, limitações e a eficácia na previsão do fechamento da B3. Vamos abordar desde a captura dos dados e o desenvolvimento das etapas de tratamento até modelagem e avaliação de desempenho dos modelos escolhidos. 
 
-## Tratamento da base de dados
+## Base de dados
 - **Captura de dados**\
-   Os dados foram extraídos do site da [Investing](https://br.investing.com/indices/bovespa-historical-data), abrangendo o período de 2010 até 2024. A base de dados contém 3585 registros, cada um representando uma entrada diária com 7 colunas de informações sobre o IBOVESPA. O DataFrame resultante tem a seguinte estrutura:
- ```
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 3585 entries, 0 to 3584
-Data columns (total 7 columns):
-#   Column    Non-Null Count  Dtype 
-0   Data      3585 non-null   int64 
-1   Último    3585 non-null   int64 
-2   Abertura  3585 non-null   int64 
-3   Máxima    3585 non-null   int64 
-4   Mínima    3585 non-null   int64 
-5   Vol.      3584 non-null   object
-6   Var%      3585 non-null   object
-dtypes: int64(5), object(2)
-```
+   Para analise utilizamos os dados do site da [Investing](https://br.investing.com/indices/bovespa-historical-data), abrangendo o período de 2010 até 2024. A base de dados contém 3585 registros, cada um representando uma entrada diária com 7 colunas de informações sobre o IBOVESPA. O DataFrame resultante tem a seguinte estrutura:
 
 **Exemplo de uma linha de dados:**
 ```
@@ -42,200 +28,80 @@ Data       Último   Abertura   Máxima   Mínima   Vol.    Var%
 28062024   123907   124308     124500   123298   9,07B   -0,32%
 ```
 
-- **Verificação de dados:**
-  - Identificação e tratamento de zeros e valores nulos foram realizados. A coluna "Vol." apresentou um valor nulo, que foi tratado para manter a integridade dos dados.
-    
-  - A coluna 'Data' foi ajustada para garantir que todas as datas estivessem no formato de 8 dígitos e convertida para o tipo de dado datetime. Isso facilita a análise temporal dos dados.
-    
-  - Foram criadas novas colunas para o dia, mês e ano com base na coluna 'Data', o que permite análises temporais mais detalhadas.
-    
-  - O índice do DataFrame foi ajustado para representar a data, facilitando a análise das séries temporais.
-```
-dados = pd.read_csv('/content/drive/My Drive/Fase 2/Dados Históricos - Ibovespa.csv', encoding='utf-8', sep=',', thousands='.', decimal=',')
+## Construindo previsões
 
-### Arrumar a Data para que tenha 8 digitos em todas tipo 10032024 e 04032024
-dados['Data'] = dados['Data'].astype(str).str.zfill(8)
-
-# Coloca em Formato de Data
-dados['Data'] = pd.to_datetime(dados['Data'], format='%d%m%Y', errors='coerce')
-
-# Cria coluna de Mês e Ano
-dados['Data'] = dados['ref'] = dados ['Data']
-dados['mes'] = dados['Data'].dt.month
-dados['ano'] = dados['Data'].dt.year
-dados['dia'] = dados['Data'].dt.day
-dados = dados.set_index('Data')
-```
-## Análise da Série Temporal
- - **Visualização da serie**
-![](imagens/serie_temporal1.png)
-
- - **Decomposição Sazonal:** Uso de um ciclo sazonal de 30 dias (+- 1 mês) para decompor a série em três componentes: tendência, sazonalidade e resíduo.
-
-   
- - **Teste de Dickey-Fuller (ADF):** Avaliação da estacionariedade da série temporal.
-    - Estatística ADF e Valores Críticos: Verificação da estacionariedade com base na estatística ADF e valores críticos.
-    - p-value: Interpretação do valor-p para determinar a estacionariedade da série.
-      
-     Para fazer essa avaliação usamos a função da bibliteca do [statsmodel](https://www.statsmodels.org/dev/generated/statsmodels.tsa.stattools.adfuller.html) adfuller e criamos um pequena função para interpretar os resultados, de forma que pudessemos utilizar
-     em outro momento caso fosse necessário.
-
-```
-#Teste de Dickey Fuller --- Pra vermos se a série é estacionária ou não.
-from statsmodels.tsa.stattools import adfuller
-
-result = adfuller(dados['Último'])
-
-print('ADF Statistic:', result[0])
-print('p-value:', result[1])
-print('Critical Values:')
-for key, value in result[4].items():
-    print(f'\t{key}: {value}')
-
-# Interpretar o resultado do teste
-alpha = 0.05
-if result[1] < alpha:
-    msg = 'Série é estacionária (rejeita H0)'
-else:
-    msg = 'Série não é estacionária (falha em rejeitar H0)'
-
-print('\nResultado do teste de estacionariedade após 1ª diferenciação:')
-print(msg)
-
------------------------------------------------------------------------------------------------------
-
-ADF Statistic: -0.845409062221046
-p-value: 0.8054183906334276
-Critical Values:
-	1%: -3.4321794657443268
-	5%: -2.8623483552705715
-	10%: -2.5672003006136257
-
-Resultado do teste de estacionariedade após 1ª diferenciação:
-Série não é estacionária (falha em rejeitar H0)
-```
-
-Podemos observar que o resultado da nossa função é corrobora com a hipótese nula, de que a série não é [estacionária](https://people.duke.edu/~rnau/411diff.htm). Dessa forma passamos ao processo de diferenciação para sua transformação. 
-      
- - **Diferenciação:** Aplicação de diferenciação simples e sazonal para tornar a série estacionária.
-```
-# Visualizando os dados originais
-print("Dados de Fecho do Ibovespa:\n", dados2.head())
-
-# Aplicar log nos dados para estabilizar a variância
-train_log = np.log(dados2)
-
-# Diferenciação simples
-train_diff = train_log.diff().dropna()
-
-# Visualizando os dados diferenciados
-print("\nDados Diferenciados (Primeira Diferença):\n", train_diff.head())
-
-# Diferenciação sazonal (anual para dados diários)
-train_seasonal_diff = train_log.diff(365).dropna()
-
-# Visualizando os dados sazonalmente diferenciados
-print("\nDados Sazonalmente Diferenciados (Anual):\n", train_seasonal_diff.head())
-
-# Função para imprimir o resultado do teste ADF
-def teste_adf(serie):
-    resultado = adfuller(serie)
-    print(f'Estatística ADF: {resultado[0]}')
-    print(f'Valor-p: {resultado[1]}')
-    print(f'Valores Críticos:')
-    for chave, valor in resultado[4].items():
-        print(f'   {chave}: {valor}')
-
-# Teste ADF na série diferenciada
-print("\nTeste ADF para série diferenciada:")
-teste_adf(train_diff)
-
-# Teste ADF na série sazonalmente diferenciada
-print("\nTeste ADF para série sazonalmente diferenciada:")
-teste_adf(train_seasonal_diff)
-
----------------------------------------------------------------
-
-Dados de Fecho do Ibovespa:
-             Último
-Data              
-2010-01-11   70433
-2010-01-12   70076
-2010-01-13   70385
-2010-01-14   69801
-2010-01-15   68978
-
-Dados Diferenciados (Primeira Diferença):
-               Último
-Data                
-2010-01-12 -0.005082
-2010-01-13  0.004400
-2010-01-14 -0.008332
-2010-01-15 -0.011861
-2010-01-18  0.006114
-
-Dados Sazonalmente Diferenciados (Anual):
-               Último
-Data                
-2011-07-01 -0.105293
-2011-07-04 -0.092402
-2011-07-05 -0.110227
-2011-07-06 -0.109442
-2011-07-07 -0.103320
-
-Teste ADF para série diferenciada:
-Estatística ADF: -22.23585251419555
-Valor-p: 0.0
-Valores Críticos:
-   1%: -3.4321794657443268
-   5%: -2.8623483552705715
-   10%: -2.5672003006136257
-
-Teste ADF para série sazonalmente diferenciada:
-Estatística ADF: -3.2226342329227267
-Valor-p: 0.01871133927444365
-Valores Críticos:
-   1%: -3.4323875260668344
-   5%: -2.862440255934873
-   10%: -2.5672492261933377
-```
+Conforme apontamos na introdução fazer uma predição dos valores de fechamento da IBOV é uma tarefa complexa, pois esses valores não são só uma função matemática, mas também a expressão do contexto econômico e politico do país. Devido a isso existem diversas variáveis exógenas que influenciam nesses valores, de eventos climáticos a comunicados de políticos e empresas. Dessa forma é importante entender que os modelos de Machine Learning buscam processar os dados de entrada, aqui o valor de fechamento, e expressar o comportamento dos dados em funções matemáticas não sendo capazes de captar a exogeneidade que o nosso objeto de estudo tem, e podemos observar essa característica na própria série temporal que chega próximo ao imprevisível, se assemelhando muito a previsão do tempo, que é possível prever mas até um determinado recorte temporal, normalmente de 15 dias. Essas características não inviabilizam a análise e sua predição, apenas servem como orientadores na nossa busca por resultados estatisticamente possíveis, sem cair na armadilha da “futurologia”.
 
 
-Vamos visualizar novamente a serie após a diferenciação
+Depois desse pequeno lembrete para a complexidade do objeto analisado vamos a aplicação dos modelos. 
 
-![](/imagens/serie_temporaldiff.png)
+## Testando os modelos
 
-A partir da diferenciação vamos plotar a analise de decomposição da serie.
+Para lidar com o nosso desafio escolhemos o modelo ARIMA e suas derivações que são o SARIMAX que faz a analise da serie utilizando 1 variável exógena, sendo a escolhida a VAR% além de levar em conta a sazonalidade. Utilizamos também o AutoArima que faz a seleção automática dos termos do ARIMA criando um modelo otimizado através de uma estratégia de tentativa-e-erro desses termos. Além do ARIMA também utilizamos o XGBOOST que atualmente é um dos modelos mais modernos e presentes no mercado.
 
-![](imagens/decomp_diff.png)
+### Observação tecnica sobre o conjunto treino e teste
+Decidimos usar os primeiros 6 meses de 2024 como conjunto de teste e o período anterior, com todas as observações anuais completas, como conjunto de treino. Garantindo que o modelo seja treinado com dados completos e variados, refletindo diferentes condições de mercado, enquanto o conjunto de teste proporciona uma avaliação das previsões em um período recente e relevante. A diferenciação dos dados foi aplicada para estabilizar a série temporal e facilitar a modelagem.
 
 
-## Modelagem da Série Temporal
+ ## ARIMA
 
- - **Modelo ARIMA**
-	- Seleção do Modelo: Identificação dos parâmetros (p, d, q) e sazonalidade (P, D, Q, S). Para isso utilizamos como referência o ACF e PACF e também o gráfico de decomposição sazonal do status modelo que ajudou a identificar de S de 30 que se mostrou o 	  mais eficiente nas execuções do modelo.
-![**ACF PACF**](imagens/ACF-PACF.png)
+A partir da seleção dos valores padrão do ARIMA e utilizando uma sazonalidade de 30 dias obtivemos os seguintes resultados. 
 
-	- Parâmetros do Modelo:
-		 - AR(1) (ar.L1): Coeficiente de 0.9881 (significativo).
-		 - MA(1) (ma.L1): Coeficiente de -0.0096 (não significativo).
-		 - AR Sazonal(30) (ar.S.L30): Coeficiente de -0.5351 (significativo).
-	- Critérios de Informação: AIC, BIC e HQIC.
-	- Testes Diagnósticos: Ljung-Box, Jarque-Bera e Heteroskedasticity.
-	- Diagnóstico do Modelo: Análise dos resíduos para verificar padrões e adequação do modelo,
+* Caso você queria visualizar o diagnostico do modelo e uma explicação mais detalhada dos parametro consulte diretamente o [notebook do trabalho](TECH_CHALLENGE_FASE_2.ipynb) na seção modelo ARIMA.
 
-## Avaliação do Modelo ARIMA
+O gráfico abaixo apresenta a predição realizada pelo modelo para 20 dias. Podemos observar que a linha pontilhada das previsões do modelo acompanha bem os sinais de subida e descida dos valores reais, indicando com o modelo foi minimamente eficiente.
+
+ ![](/imagens/arima_20_dias.png)
+
+
+### Avaliação do Modelo ARIMA
 
  - **Métricas de Avaliação:**
-	- MSE (Mean Squared Error): 799,849.81
-	- MAE (Mean Absolute Error): 708.31
-	- MAPE (Mean Absolute Percentage Error): 7.49%
+	- MSE (Mean Squared Error): 1358608.88
+	- MAE (Mean Absolute Error): 950.72
+	- MAPE (Mean Absolute Percentage Error): 10.31%
 		- O MAPE relativamente baixo indica um bom desempenho geral do ARIMA. Embora o MSE e o MAE sejam altos, o MAPE fornece uma visão mais relativa e confiável da eficácia do modelo.
+    
+  - Os resultados indicam que o modelo ARIMA apresenta um erro médio absoluto (MAE) relativamente baixo e uma precisão razoável, conforme evidenciado pelo MAPE de 10,31%. O MSE também sugere uma variabilidade moderada nos erros de previsão.
 
-- **Modelo XGBoost**
-	- Parâmetros do Modelo: {'learning_rate': 0.2, 'max_depth': 7, 'n_estimators': 150}.
-	- Treinamento e Previsão: Ajuste do modelo aos dados de treino e avaliação nas previsões.
-	- Análise de Overfitting: Comparação de métricas de treinamento e teste para identificar sinais de overfitting.
+### AutoArima
+Com o objetivo de tentar melhorar um pouco os termos do modelo e consequentemente os resultados fizemos um teste utilizando o modelo gerado pelo AutoArima. Porém não obtivemos resultados significativos.
+Mesmo com a série diferenciada podemos observar que as predições têm bastante dificuldade em seguir a linha dos valores reais. 
+
+ ![](/imagens/autorima_preds.png)
+
+- MSE: 5.747
+- MAE: 0.006
+- MAPE: 223.58%
+
+Após o ajuste do AutoARIMA, o MSE de 5.747 e o MAE de aproximadamente 0,006 indicam uma melhora significativa na precisão das previsões, com erros muito baixos. No entanto, o MAPE de 223,58% sugere que, em média, as previsões têm um erro percentual muito alto em relação aos valores reais, o que pode ocorrer devido a valores reais próximos de zero. Isso indica que, embora o modelo esteja fazendo previsões precisas em termos absolutos, ele pode não estar capturando bem a variação relativa dos dados.
+
+
+## Sarimax
+
+O modelos SARIMAX utiliza os parâmetros de sazonalidade juntamente com uma variável exógena. Para execução dessa modelos optamos por usar a sazonalidade de 30 dias, por acreditar que mais do que isso o modelos poderia ficar enviesado. Referente a variável exógena optamos por utilizar a Var% por perceber que apresentava naturalmente alguns padrões interessantes para análise de séries temporais, como a estacionaridade. O gráfico abaixo apresenta a previsão para 30 dias utilizando o Sarimax.
+
+ ![](/imagens/sarimax.png)
+
+Observamos que as predições conseguem acompanhar as tendências, porém extrapolando muito os valores.  
+
+- MAE: 1902.8919625508788
+- MSE: 5350782.7445759075
+- MAPE: 1.4937721679334748%
+
+O MAE e o MSE indicam erros relativamente altos em termos absolutos, sugerindo que as previsões podem estar distantes dos valores reais. No entanto, o MAPE muito baixo indica que o modelo está capturando bem a variação percentual dos dados.
+
+## XGBoost
+O modelo XGBoost aceita que utilizemos características auxiliar para construir as previsões do modelo dessa forma utilizamos além da data(dia/mês/ano) também optamos por utilizar o valor de abertura que seriam as informações disponíveis  para previsão em um cenário real. 
+O modelo também disponibiliza um recurso onde apresenta as características mais relevantes para as predições conforme mostra o gráfico abaixo. 
+
+![](/imagens/imp_xgboost.png)
+
+No gráfico a seguir seguem os valores reais acompanhados pelas previsões realizadas pelo modelo.
+
+![](/imagens/pred_xgb.png)
+
+
 
 ## Resultados e Discussão
  - **Modelo ARIMA:** Embora tenha mostrado um MAPE razoável (7.49%), o ARIMA apresentou valores altos de MAE (708.31) e MSE (799,849.81). A análise dos resíduos sugere que o modelo está ajustado de forma adequada, sem sinais claros de overfitting. O MAPE é um bom indicador da precisão relativa do modelo.
