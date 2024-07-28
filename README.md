@@ -101,27 +101,61 @@ No gráfico a seguir seguem os valores reais acompanhados pelas previsões reali
 
 ![](/imagens/pred_xgb.png)
 
+- MAE: 1229.2981927710844
+- MSE: 2634552.508005165
+- MAPE: 0.9853889386520265%
+
+O MAE e o MSE indicam erros médios e variabilidade consideráveis nas previsões, com um MAE de 1229,30 e um MSE de 2.634.552,51. No entanto, o MAPE muito baixo de 0,985% sugere que, em termos percentuais, o modelo tem uma precisão excelente. Além disso, o [gráfico de resíduos](TECH_CHALLENGE_FASE_2.ipynb) mostra um bom desempenho, com os valores oscilando perto de zero e sem padrões evidentes, o que reforça a robustez da precisão relativa do modelo, apesar dos erros absolutos.
+
+## Resultados
+
+**ARIMA:**
+
+- MSE: 1.358.608,88
+
+- MAE: 950,72
+
+- MAPE: 10,31%
+
+O ARIMA apresenta um MAE e MSE relativamente baixos e um MAPE moderado, indicando previsões razoavelmente precisas com alguns erros.
+
+**AutoARIMA:**
 
 
-## Resultados e Discussão
- - **Modelo ARIMA:** Embora tenha mostrado um MAPE razoável (7.49%), o ARIMA apresentou valores altos de MAE (708.31) e MSE (799,849.81). A análise dos resíduos sugere que o modelo está ajustado de forma adequada, sem sinais claros de overfitting. O MAPE é um bom indicador da precisão relativa do modelo.
-   
- - **Modelo XGBoost:** Mostrou um excelente desempenho com MAE (3.95) e MSE (53.53) baixos, mas evidências de overfitting foram observadas, especialmente pela discrepância entre o desempenho em treinamento e teste. O MAPE extremamente baixo (0.04%) sugere que o modelo pode ter se ajustado demais aos dados de treinamento.
+- MSE: 5.747 e-0.5
 
-### Análise dos Resíduos:
- - **ARIMA:** Os resíduos mostraram uma distribuição razoavelmente normal, mas o histograma não era perfeitamente normal, indicando possíveis discrepâncias.
+- MAE: 0,006
 
- - **XGBoost:** Os resíduos estavam próximos de zero, indicando uma boa correspondência entre previsões e valores reais, mas a precisão elevada pode mascarar problemas de overfitting.
+- MAPE: 223,58%
 
-### Impacto das Métricas:
- - **ARIMA:** Embora os valores altos de MSE e MAE sejam indicativos de erros grandes, o MAPE fornece uma visão relativa mais confiável, considerando a escala dos dados.
+O AutoARIMA tem um MSE e MAE muito baixos, sugerindo previsões precisas em termos absolutos. No entanto, o MAPE muito alto indica problemas na precisão percentual, possivelmente devido a valores reais próximos de zero.
 
- - **XGBoost:** A baixa performance em dados de teste indica que o modelo pode estar se ajustando demais, o que é preocupante para as previsões futuras.
+**SARIMAX:**
+
+
+- MSE: 5.350.782,74
+
+- MAE: 1902,89
+
+- MAPE: 1,49%
+
+O SARIMAX tem um MSE e MAE relativamente altos, mas um MAPE muito baixo, mostrando boa precisão percentual apesar dos erros absolutos maiores.
+
+**XGBoost:**
+
+- MSE: 2.634.552,51
+- MAE: 1229,30
+- MAPE: 0,99%
+
+O XGBoost apresenta um MSE e MAE significativos, mas com um MAPE muito baixo, indicando alta precisão percentual, mas com erros absolutos consideráveis.
 
 ## Conclusão
 
- - **Resumo dos Resultados:** O ARIMA, apesar de ter apresentado métricas de erro mais altas, mostrou-se mais robusto e menos sujeito a overfitting em comparação ao XGBoost. O MAPE mais baixo do ARIMA é indicativo de uma previsibilidade mais consistente.
+- O AutoARIMA tem a melhor performance em termos absolutos, mas problemas com a precisão percentual.
+- O SARIMAX mostra boa precisão percentual, mas com erros absolutos maiores.
+- O XGBoost tem uma precisão percentual excelente, mas também apresenta erros absolutos significativos.
+- O ARIMA oferece um bom equilíbrio entre erros absolutos e percentuais, com uma performance geral razoável.
 
- - **Justificativa das Técnicas Utilizadas:** A escolha do ARIMA foi fundamentada na sua capacidade de generalização e estabilidade em previsões, mesmo com erros absolutos mais elevados. O XGBoost, apesar de seu bom desempenho absoluto, foi menos confiável devido ao overfitting.
 
- - **Recomendações para Trabalhos Futuros:** Melhorar o modelo XGBoost para evitar overfitting e explorar técnicas adicionais para validação cruzada e ajuste de parâmetros. Considerar a inclusão de variáveis exógenas ou modelos híbridos para aprimorar a precisão das previsões.
+## Orientação final
+No desenvolvimento do projeto pudemos observar a complexidade da tarefa proposta como colocamos inicialmente, a análise inicial dos dados e a própria variação nos resultados dos modelos contribuem para percepção do aspecto multifacetado do objeto de analise. Frente e essa situação entendemos que o XGBoost é o modelo que apresenta os resultados mais próximos do ideal, pois apresenta um MAPE muito baixo (0,99%), indicando alta precisão percentual, e o gráfico de resíduos sugere que o modelo está capturando bem a dinâmica da série temporal, com erros relativamente pequenos e sem padrões evidentes nos resíduos. Embora o MAE e o MSE sejam maiores em comparação com outros modelos, a alta precisão percentual e a análise dos resíduos tornam o XGBoost uma escolha robusta para previsões diárias do fechamento da base da IBOVESPA.
