@@ -39,7 +39,7 @@ Depois desse pequeno lembrete para a complexidade do objeto analisado vamos a ap
 
 Para lidar com o nosso desafio escolhemos o modelo ARIMA e suas derivações que são o SARIMAX que faz a analise da serie utilizando 1 variável exógena, sendo a escolhida a VAR% além de levar em conta a sazonalidade. Utilizamos também o AutoArima que faz a seleção automática dos termos do ARIMA criando um modelo otimizado através de uma estratégia de tentativa-e-erro desses termos. Além do ARIMA também utilizamos o XGBOOST que atualmente é um dos modelos mais modernos e presentes no mercado.
 
-### Observação tecnica sobre o conjunto treino e teste
+### Observação técnica sobre o conjunto treino e teste
 Decidimos usar os primeiros 6 meses de 2024 como conjunto de teste e o período anterior, com todas as observações anuais completas, como conjunto de treino. Garantindo que o modelo seja treinado com dados completos e variados, refletindo diferentes condições de mercado, enquanto o conjunto de teste proporciona uma avaliação das previsões em um período recente e relevante. A diferenciação dos dados foi aplicada para estabilizar a série temporal e facilitar a modelagem.
 
 
