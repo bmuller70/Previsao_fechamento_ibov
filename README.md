@@ -37,7 +37,7 @@ Depois desse pequeno lembrete para a complexidade do objeto analisado vamos a ap
 
 ## Testando os modelos
 
-Para lidar com o nosso desafio escolhemos o modelo ARIMA e suas derivações que são o SARIMAX que faz a analise da serie utilizando 1 variável exógena, sendo a escolhida a VAR% além de levar em conta a sazonalidade. Utilizamos também o AutoArima que faz a seleção automática dos termos do ARIMA criando um modelo otimizado através de uma estratégia de tentativa-e-erro desses termos. Além do ARIMA também utilizamos o XGBOOST que atualmente é um dos modelos mais modernos e presentes no mercado.
+Para lidar com o nosso desafio escolhemos o modelo ARIMA e suas derivações que são o SARIMAX que faz a analise da série utilizando 1 variável exógena, sendo a escolhida a VAR% além de levar em conta a sazonalidade. Utilizamos também o AutoArima que faz a seleção automática dos termos do ARIMA criando um modelo otimizado através de uma estratégia de tentativa-e-erro desses termos. Além do ARIMA também utilizamos o XGBOOST que atualmente é um dos modelos mais modernos e presentes no mercado.
 
 ### Observação técnica sobre o conjunto treino e teste
 Decidimos usar os primeiros 6 meses de 2024 como conjunto de teste e o período anterior, com todas as observações anuais completas, como conjunto de treino. Garantindo que o modelo seja treinado com dados completos e variados, refletindo diferentes condições de mercado, enquanto o conjunto de teste proporciona uma avaliação das previsões em um período recente e relevante. A diferenciação dos dados foi aplicada para estabilizar a série temporal e facilitar a modelagem.
@@ -49,7 +49,7 @@ A partir da seleção dos valores padrão do ARIMA e utilizando uma sazonalidade
 
 * Caso você queria visualizar o diagnostico do modelo e uma explicação mais detalhada dos parametro consulte diretamente o [notebook do trabalho](TECH_CHALLENGE_FASE_2.ipynb) na seção modelo ARIMA.
 
-O gráfico abaixo apresenta a predição realizada pelo modelo para 20 dias. Podemos observar que a linha pontilhada das previsões do modelo acompanha bem os sinais de subida e descida dos valores reais, indicando com o modelo foi minimamente eficiente.
+O gráfico abaixo apresenta a predição realizada pelo modelo para 20 dias. Podemos observar que a linha pontilhada das previsões do modelo acompanha bem os sinais de subida e descida dos valores reais, indicando que o modelo foi minimamente eficiente.
 
  ![](/imagens/arima_20_dias.png)
 
@@ -158,4 +158,4 @@ O XGBoost apresenta um MSE e MAE significativos, mas com um MAPE muito baixo, in
 
 
 ## Orientação final
-No desenvolvimento do projeto pudemos observar a complexidade da tarefa proposta como colocamos inicialmente, a análise inicial dos dados e a própria variação nos resultados dos modelos contribuem para percepção do aspecto multifacetado do objeto de analise. Frente e essa situação entendemos que o XGBoost é o modelo que apresenta os resultados mais próximos do ideal, pois apresenta um MAPE muito baixo (0,99%), indicando alta precisão percentual, e o gráfico de resíduos sugere que o modelo está capturando bem a dinâmica da série temporal, com erros relativamente pequenos e sem padrões evidentes nos resíduos. Embora o MAE e o MSE sejam maiores em comparação com outros modelos, a alta precisão percentual e a análise dos resíduos tornam o XGBoost uma escolha robusta para previsões diárias do fechamento da base da IBOVESPA.
+No desenvolvimento do projeto podemos observar a complexidade da tarefa proposta como colocamos inicialmente, a análise inicial dos dados e a própria variação nos resultados dos modelos contribuem para percepção do aspecto multifacetado do objeto de analise. Frente a essa situação entendemos que o XGBoost é o modelo que apresenta os resultados mais próximos do ideal, pois apresenta um MAPE muito baixo (0,99%), indicando alta precisão percentual, e o gráfico de resíduos sugere que o modelo está capturando bem a dinâmica da série temporal, com erros relativamente pequenos e sem padrões evidentes nos resíduos. Embora o MAE e o MSE sejam maiores em comparação com outros modelos, a alta precisão percentual e a análise dos resíduos tornam o XGBoost uma escolha robusta para previsões diárias do fechamento da base da IBOVESPA.
